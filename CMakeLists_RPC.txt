@@ -1,0 +1,119 @@
+cmake_minimum_required(VERSION 3.10)
+project(WebServerWithRPC)
+
+# 设置C++标准
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# 设置编译选项
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unused-parameter -Wno-unused-variable")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -g")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O2 -DNDEBUG")
+
+# 查找依赖库
+find_package(Threads REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(JSONCPP jsoncpp)
+
+# 如果系统没有jsoncpp，提供备选方案
+if(NOT JSONCPP_FOUND)
+    message(WARNING "jsoncpp not found via pkg-config, trying to find it manually")
+    find_library(JSONCPP_LIBRARIES jsoncpp)
+    find_path(JSONCPP_INCLUDE_DIRS json/json.h)
+    
+    if(NOT JSONCPP_LIBRARIES OR NOT JSONCPP_INCLUDE_DIRS)
+        message(FATAL_ERROR "jsoncpp library not found. Please install libjsoncpp-dev")
+    endif()
+endif()
+
+# 包含目录
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${JSONCPP_INCLUDE_DIRS})
+
+# 添加base库
+add_subdirectory(base)
+
+# 添加RPC库
+add_subdirectory(rpc)
+
+# 主程序源文件
+set(WEBSERVER_SOURCES
+    Main.cpp
+    Server.cpp
+    Channel.cpp
+    Epoll.cpp
+    EventLoop.cpp
+    EventLoopThread.cpp
+    EventLoopThreadPool.cpp
+    HttpData.cpp
+    Timer.cpp
+    Util.cpp
+    ThreadPool.cpp
+)
+
+# 创建主程序
+add_executable(webserver_with_rpc ${WEBSERVER_SOURCES})
+
+# 链接库
+target_link_libraries(webserver_with_rpc
+    libserver_base
+    rpc_lib
+    ${JSONCPP_LIBRARIES}
+    Threads::Threads
+)
+
+# 创建仅HTTP版本（向后兼容）
+add_executable(webserver_http_only ${WEBSERVER_SOURCES})
+target_link_libraries(webserver_http_only
+    libserver_base
+    Threads::Threads
+)
+
+# 设置编译定义
+target_compile_definitions(webserver_with_rpc PRIVATE ENABLE_RPC=1)
+
+# 安装目标
+install(TARGETS webserver_with_rpc webserver_http_only
+    RUNTIME DESTINATION bin
+)
+
+# 安装配置文件
+install(FILES rpc/config/rpc_server.conf
+    DESTINATION etc/webserver/
+)
+
+# 安装文档
+install(FILES 
+    rpc/docs/RPC_PROTOCOL_SPECIFICATION.md
+    rpc/docs/INTERFACE_CHANGES.md
+    DESTINATION share/doc/webserver/
+)
+
+# 创建测试目标
+enable_testing()
+
+# 添加基础功能测试
+add_test(NAME http_basic_test 
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_http_tests.sh
+)
+
+add_test(NAME rpc_basic_test
+    COMMAND rpc_test_client -s localhost -p 8080 -t basic
+)
+
+# 打印配置信息
+message(STATUS "WebServer with RPC Configuration:")
+message(STATUS "  C++ Standard: ${CMAKE_CXX_STANDARD}")
+message(STATUS "  Build Type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "  JsonCpp Found: ${JSONCPP_FOUND}")
+message(STATUS "  JsonCpp Libraries: ${JSONCPP_LIBRARIES}")
+message(STATUS "  JsonCpp Include Dirs: ${JSONCPP_INCLUDE_DIRS}")
+
+# 创建配置头文件
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/config.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/config.h"
+)
+
+# 添加配置头文件到包含路径
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")

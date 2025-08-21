@@ -1,0 +1,22 @@
+{
+  "DevContainersInfoBarHidden": true,
+  "OutputFoldersPerTargetSystem": {
+    "Local Machine": [
+      "out\\build\\x64-Debug",
+      "out\\install\\x64-Debug",
+      "out\\build\\Linux-GCC-Debug",
+      "out\\install\\Linux-GCC-Debug"
+    ],
+    "192.168.219.128": [
+      "out\\build\\x64-Debug",
+      "out\\install\\x64-Debug",
+      "out\\build\\Linux-GCC-Debug",
+      "out\\install\\Linux-GCC-Debug"
+    ]
+  },
+  "ActiveTargetSystem": "192.168.219.128",
+  "ExpandedNodes": [
+    ""
+  ],
+  "PreviewInSolutionExplorer": false
+}

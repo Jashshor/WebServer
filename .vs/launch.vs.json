@@ -1,0 +1,16 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "cppgdb",
+      "name": "CMakeLists.txt",
+      "project": "CMakeLists.txt",
+      "projectTarget": "",
+      "comment": "了解如何配置远程调试。有关详细信息，请参阅 http://aka.ms/vslinuxdebug",
+      "debuggerConfiguration": "gdbserver",
+      "args": [],
+      "env": {}
+    }
+  ]
+}

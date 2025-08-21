@@ -1,0 +1,62 @@
+{
+  "test_cases": [
+    {
+      "name": "echo_test",
+      "method": "echo",
+      "params": "{\"message\":\"Hello, RPC!\"}",
+      "expected_result": "{\"message\":\"Hello, RPC!\"}",
+      "timeout": 5000,
+      "should_succeed": true
+    },
+    {
+      "name": "add_numbers",
+      "method": "add",
+      "params": "{\"a\":10,\"b\":20}",
+      "expected_result": "{\"result\":30}",
+      "timeout": 3000,
+      "should_succeed": true
+    },
+    {
+      "name": "invalid_method",
+      "method": "nonexistent_method",
+      "params": "{}",
+      "expected_result": "",
+      "timeout": 5000,
+      "should_succeed": false
+    },
+    {
+      "name": "timeout_test",
+      "method": "slow_operation",
+      "params": "{\"delay\":10000}",
+      "expected_result": "",
+      "timeout": 1000,
+      "should_succeed": false
+    },
+    {
+      "name": "large_data_test",
+      "method": "process_data",
+      "params": "{\"data\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}",
+      "expected_result": "{\"processed\":true}",
+      "timeout": 10000,
+      "should_succeed": true
+    }
+  ],
+  "concurrency_tests": [
+    {
+      "name": "basic_concurrency",
+      "thread_count": 10,
+      "requests_per_thread": 100,
+      "duration_seconds": 30,
+      "method": "echo",
+      "params": "{\"message\":\"concurrent_test\"}"
+    },
+    {
+      "name": "high_concurrency",
+      "thread_count": 50,
+      "requests_per_thread": 200,
+      "duration_seconds": 60,
+      "method": "add",
+      "params": "{\"a\":1,\"b\":2}"
+    }
+  ]
+}
